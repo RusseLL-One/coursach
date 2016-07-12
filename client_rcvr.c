@@ -18,11 +18,12 @@ int main(int argc, char *argv[])
 {
 	int brcstSock;                    /* Socket */
     struct sockaddr_in broadcastAddr; /* Broadcast Address */
-    unsigned short broadcastPort;     /* Port */
+    unsigned short broadcastPort = 32012;     /* Port */
 	int sign = 0; 						  /* Полученная датаграмма */
 	
 	int serverSock;                        /* Socket descriptor */
     struct sockaddr_in serverAddr;    /* Адрес сервера */
+    unsigned short serverPort = 32001;
     socklen_t len = sizeof(serverAddr);   /* Размер структуры сервера */
                
     PbMessage *msgBuf;
@@ -31,12 +32,11 @@ int main(int argc, char *argv[])
 	
 	uint8_t firstConnect=1;
 	        
-	if (argc != 2)                     // Test for correct number of parameters 
+	if (argc != 1)                     // Test for correct number of parameters 
     {
-        fprintf(stderr,"Usage:  %s <Broadcast port>\n", argv[0]);
+        fprintf(stderr,"Usage:  %s\n", argv[0]);
         exit(1);
-    }
-    broadcastPort = atoi(argv[1]);/* broadcast port */     
+    }  
             
     /* Создаем UDP сокет для приёма ШР */
     if ((brcstSock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
@@ -56,28 +56,23 @@ int main(int argc, char *argv[])
     {
 		broadcastAddr.sin_port = htons(++broadcastPort);
 	}
+	printf("Port: %d\n", broadcastPort);
     for(;;)
     {
     /* Принимаем датаграмму */
-    sign=0;
-    while(sign!=2)
-    {
     if (recvfrom(brcstSock, &sign, sizeof(sign), 0, (struct sockaddr *)&serverAddr, &len) < 0)
         DieWithError("recvfrom() failed");    
-    }
     
-    serverAddr.sin_port = htons(60000);
+    serverAddr.sin_port = htons(serverPort);
     if(firstConnect==1)
 	{
 		/* Подключаемся к серверу */
 		if (connect(serverSock, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) < 0)
 		DieWithError("connect() failed");
-		//Сообщаем серверу, что этот клиент - получатель
-		if (send(serverSock, &sign, sizeof(sign), 0) != sizeof(sign))
-		DieWithError("send() sent a different number of bytes than expected");
 		firstConnect=0;
 	}
 	/* Сообщаем серверу о готовности принять сообщение */
+	sign=5;
     /*if (*/send(serverSock, &sign, sizeof(int), 0);// != sizeof(int))
     //DieWithError("send() sent a different number of bytes than expected");
     /* Принимаем сообщение */
@@ -85,9 +80,8 @@ int main(int argc, char *argv[])
     memset(buf, 0, sizeof(buf));
     if ((msgLen=recv(serverSock, &buf, MAX_MSG_SIZE, 0)) < 0)
         DieWithError("recv() failed");
-
     msgBuf = pb_message__unpack(NULL, msgLen, buf);      
-    printf("Received message: %s, length = %d, sleep time = %d\n", msgBuf->message.data, (int)msgBuf->message.len, msgBuf->t);  
+    printf("\033[0;34mReceived message:\033[0m %s, length = %d, sleep time = %d\n", msgBuf->message.data, (int)msgBuf->message.len, msgBuf->t);  
     sleep(msgBuf->t);
     free(msgBuf);
 	}
