@@ -67,8 +67,8 @@ int main(int argc, char *argv[])
 	}
 	/* Сообщаем серверу о готовности принять сообщение */
 	sign=5;
-    /*if (*/send(serverSock, &sign, sizeof(int), 0);// != sizeof(int))
-    //DieWithError("send() sent a different number of bytes than expected");
+    if (send(serverSock, &sign, sizeof(sign), 0) != sizeof(sign))
+    DieWithError("send() sent a different number of bytes than expected");
     /* Принимаем сообщение */
     uint8_t buf[MAX_MSG_SIZE];
     memset(buf, 0, sizeof(buf));
