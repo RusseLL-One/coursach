@@ -36,12 +36,6 @@ int main(int argc, char *argv[])
     unsigned msglen;
     
     int8_t firstConnect = 1;
-    if (argc != 1)                     // Test for correct number of parameters 
-    {
-        fprintf(stderr,"Usage:  %s <Server Port>\n", argv[0]);
-        exit(1);
-    }
-    //serverPort = atoi(argv[1]);
     
     /* Создаем UDP сокет для приёма ШР */
     if ((brcstSock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)

@@ -213,11 +213,10 @@ int main(int argc, char *argv[])
     
      if (argc != 3)                     // Test for correct number of parameters 
     {
-        fprintf(stderr,"Usage:  %s <IP Address> <Port>\n", argv[0]);
+        fprintf(stderr,"Usage:  %s <IP Address>\n", argv[0]);
         exit(1);
     }
     broadcastIP = argv[1];            /* First arg:  broadcast IP address */ 
-    //servPort = atoi(argv[2]);
     
     /* Создаем сокет для рассылки */
     if ((brcstSock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
